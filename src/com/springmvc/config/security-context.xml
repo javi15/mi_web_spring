@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd 
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<security:http use-expressions="true">
+		<security:intercept-url pattern="/" access="permitAll" /> <!-- Permite a todos los usuarios no registrados -->
+		<security:intercept-url pattern="/login" access="permitAll" />
+		<security:intercept-url pattern="/usuario/**" access="isAuthenticated()" />
+		<security:intercept-url pattern="/about" access="isAuthenticated()" /> <!-- Usuarios Registrados -->
+		<security:intercept-url pattern="/admin" access="isAuthenticated()" /> <!-- Area de admin user autenticated -->
+<!-- 		<security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" method="GET" /> -->
+<!-- 		Coleccion de Roles con hasanyRole() -->
+		<security:intercept-url pattern="/admin/**" access="hasAnyRole({'ROLE_ROOT','ROLE_ADMIN'})"/>
+		<security:intercept-url pattern="/direcciones/**" access="hasRole('ROLE_ADMIN')" />
+		<security:intercept-url pattern="/**" access="denyAll" />
+		<security:form-login login-page="/login"
+			authentication-failure-url="/login?error=true" />
+		<!-- 		<security:csrf disabled="true" /> -->
+		<security:logout invalidate-session="true" logout-url="/logout" />
+		<security:remember-me token-validity-seconds="10000"
+			user-service-ref="customUserDetailsSErvice" />
+	</security:http>
+
+
+	<security:authentication-manager erase-credentials="false">
+	
+		<security:authentication-provider
+			ref="customAuthenticationProvider">
+
+			
+		</security:authentication-provider>
+	</security:authentication-manager>
+	
+	<bean id="customAuthenticationProvider"
+		class="com.springmvc.config.CustomAuthenticationProvider">
+	</bean>
+	<bean id="customUserDetailsSErvice"
+		class="com.springmvc.config.CustomDetailsService">
+	</bean>
+	<bean id="PasswordEncoder"
+		class="org.springframework.security.crypto.password.StandardPasswordEncoder">
+	</bean>
+</beans>
